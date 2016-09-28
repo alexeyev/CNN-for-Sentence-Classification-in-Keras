@@ -2,14 +2,16 @@ import numpy as np
 import re
 import itertools
 from collections import Counter
+
 """
-Original taken from https://github.com/dennybritz/cnn-text-classification-tf
+    Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
+
 
 def clean_str(string):
     """
-    Tokenization/string cleaning for all datasets except for SST.
-    Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
+        Tokenization/string cleaning for all datasets except for SST.
+        Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
     string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
     string = re.sub(r"\'s", " \'s", string)
@@ -106,10 +108,12 @@ def batch_iter(data, batch_size, num_epochs):
     data = np.array(data)
     data_size = len(data)
     num_batches_per_epoch = int(len(data)/batch_size) + 1
+
     for epoch in range(num_epochs):
         # Shuffle the data at each epoch
         shuffle_indices = np.random.permutation(np.arange(data_size))
         shuffled_data = data[shuffle_indices]
+
         for batch_num in range(num_batches_per_epoch):
             start_index = batch_num * batch_size
             end_index = min((batch_num + 1) * batch_size, data_size)
