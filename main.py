@@ -6,15 +6,17 @@ from w2v import train_word2vec
 
 np.random.seed(2)
 
-model_variation = 'CNN-rand'  # CNN-rand | CNN-non-static | CNN-static
+model_variation = 'CNN-static'  # CNN-rand | CNN-non-static | CNN-static
 print('Model variation is %s' % model_variation)
+
+# todo: make parametrizable from console
 
 # model hyperparameters
 sequence_length = 56
-embedding_dim = 300 # 20
-filter_sizes = (3, 4, 5) # (3, 4)
+embedding_dim = 300  # 20
+filter_sizes = (3, 4, 5)  # (3, 4)
 num_filters = 150
-dropout_prob = (0.25, 0.5)
+dropout_prob = (0.5, 0.5, 0.5)
 hidden_dims = 150
 
 # training parameters
@@ -28,21 +30,24 @@ context = 10  # Context window size
 
 # Load data
 print("Loading data...")
-x, y, vocabulary, vocabulary_inv = data_helpers.load_data()
+
+(xt, yt), (x_test, y_test) = data_helpers.load_ok_data_gender()
+
+xt, yt, x_test, y_test, vocabulary, vocabulary_inv = data_helpers.build_word_level_data((xt, yt), (x_test, y_test))
 
 if model_variation == 'CNN-non-static' or model_variation == 'CNN-static':
-    embedding_weights = train_word2vec(x, vocabulary_inv, embedding_dim, min_word_count, context)
+    embedding_weights = train_word2vec(xt, vocabulary_inv, embedding_dim, min_word_count, context)
     if model_variation == 'CNN-static':
-        x = embedding_weights[0][x]
+        xt = embedding_weights[0][xt]
 elif model_variation == 'CNN-rand':
     embedding_weights = None
 else:
     raise ValueError('Unknown model variation')
 
 # Shuffle data
-shuffle_indices = np.random.permutation(np.arange(len(y)))
-x_shuffled = x[shuffle_indices]
-y_shuffled = y[shuffle_indices].argmax(axis=1)
+# shuffle_indices = np.random.permutation(np.arange(len(y)))
+# x_shuffled = x[shuffle_indices]
+# y_shuffled = y[shuffle_indices].argmax(axis=1)
 
 print("Vocabulary Size: {:d}".format(len(vocabulary)))
 
@@ -51,8 +56,12 @@ model = build_compiled_model(model_variation, sequence_length, embedding_dim,
                              embedding_weights, dropout_prob, hidden_dims)
 
 # Training model
-model.fit(x_shuffled, y_shuffled,
+model.fit(xt, yt,
           batch_size=batch_size,
           nb_epoch=num_epochs,
           validation_split=val_split,
           verbose=2)
+
+res = model.test_on_batch(x_test, y_test)
+
+print(res)

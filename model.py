@@ -8,7 +8,6 @@ from keras.models import Sequential, Model
 def build_compiled_model(model_variation, sequence_length, embedding_dim,
                          filter_sizes, num_filters, vocabulary, embedding_weights,
                          dropout_prob, hidden_dims):
-
     # graph subnet with one input and one output,
     # convolutional layers concatenated in parallel
     graph_in = Input(shape=(sequence_length, embedding_dim))
@@ -40,12 +39,14 @@ def build_compiled_model(model_variation, sequence_length, embedding_dim,
                             input_length=sequence_length,
                             weights=embedding_weights))
 
-    model.add(Dropout(dropout_prob[0], input_shape=(sequence_length, embedding_dim)))
+    model.add(Dropout(p=dropout_prob[0], input_shape=(sequence_length, embedding_dim)))
     model.add(graph)
     model.add(Dense(output_dim=hidden_dims))
     model.add(Dropout(p=dropout_prob[1]))
     model.add(Activation(activation='relu'))
     model.add(Dense(output_dim=1))
+    # not sure
+    # model.add(Dropout(p=dropout_prob[2]))
     model.add(Activation(activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
