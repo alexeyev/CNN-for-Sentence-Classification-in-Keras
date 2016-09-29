@@ -1,4 +1,8 @@
 # coding:utf-8
+"""
+    Custom datasets reading and preprocessing routines
+"""
+
 import itertools
 import re
 from collections import Counter
@@ -12,8 +16,8 @@ mystem = pymystem3.Mystem()
 
 def clean_str(string):
     """
-    Tokenization/string cleaning for all datasets except for SST.
-    Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
+        Tokenization/string cleaning for all datasets except for SST.
+        Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
     string = re.sub(r"[^A-Za-zА-Яа-я0-9(),!?\'\`]", " ", string)
     string = re.sub(r"\'s", " \'s", string)
@@ -69,8 +73,8 @@ def pad_sentences(sentences, maxlen=56, padding_word="<PAD/>"):
 
 def build_vocab(sentences):
     """
-    Builds a vocabulary mapping from word to index based on the sentences.
-    Returns vocabulary mapping and inverse vocabulary mapping.
+        Builds a vocabulary mapping from word to index based on the sentences.
+        Returns vocabulary mapping and inverse vocabulary mapping.
     """
     # Build vocabulary
     word_counts = Counter(itertools.chain(*sentences))

@@ -1,3 +1,4 @@
+# coding: utf-8
 import os
 from os.path import join, exists, split
 
@@ -55,9 +56,9 @@ def train_word2vec(sentence_matrix, vocabulary_inv, num_features=300,
         embedding_model.save(model_name)
 
     # add words trained w2v model doesn't know
-    embedding_weights = [np.array([embedding_model[w] if w in embedding_model \
+    embedding_weights = np.array([embedding_model[w] if w in embedding_model \
                                        else np.random.uniform(-0.25, 0.25, embedding_model.vector_size) \
-                                   for w in vocabulary_inv])]
+                                   for w in vocabulary_inv])
     return embedding_weights
 
 

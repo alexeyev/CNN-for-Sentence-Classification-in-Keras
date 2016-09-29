@@ -1,8 +1,15 @@
+# coding: utf-8
+"""
+    todo: should have l2 norm constraints for regularization (paper, section 2.1)
+"""
+
 from keras.layers import \
     Activation, Dense, Dropout, \
-    Embedding, Flatten, Input, \
-    Merge, Convolution1D, MaxPooling1D
+    Embedding, Input, Merge, Convolution1D
+from keras.layers.core import Lambda
 from keras.models import Sequential, Model
+from keras import backend as K
+
 
 def max_1d(X):
     """
@@ -13,7 +20,7 @@ def max_1d(X):
 
 def build_compiled_model(model_variation, sequence_length, embedding_dim,
                          filter_sizes, num_filters, vocabulary, embedding_weights,
-                         dropout_prob, hidden_dims):
+                         dropout_prob, hidden_dims, optimizer):
     # graph subnet with one input and one output,
     # convolutional layers concatenated in parallel
     graph_in = Input(shape=(sequence_length, embedding_dim))
@@ -30,9 +37,10 @@ def build_compiled_model(model_variation, sequence_length, embedding_dim,
         # pool = MaxPooling1D(pool_length=2)(conv)
         # but the paper suggested max-over-time pooling
         # see https://github.com/fchollet/keras/commit/85f80714c29d6bd8c8cde9138f0369f5df1b9a33
-        pool = Lambda(max_1d, output_shape=(num_filters,))
-        flatten = Flatten()(pool)
-        convs.append(flatten)
+        pool = Lambda(max_1d, output_shape=(num_filters,))(conv)
+        # todo: check if everything is ok with dimensions
+        # flatten = Flatten()(pool)
+        convs.append(pool)
 
     if len(filter_sizes) > 1:
         out = Merge(mode='concat')(convs)
@@ -61,6 +69,6 @@ def build_compiled_model(model_variation, sequence_length, embedding_dim,
     # not sure whether this was in the original paper
     # model.add(Dropout(p=dropout_prob[2]))
     model.add(Activation(activation='sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     return model
