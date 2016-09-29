@@ -25,4 +25,7 @@ Code is a fork of this implementation [link](https://github.com/alexander-rakhli
 ## Dependencies
 
 * [Keras](http://keras.io/) 
-* [Theano](http://deeplearning.net/software/theano/install.html#install) / [Tensorflow](https://www.tensorflow.org/)
+* [Tensorflow](https://www.tensorflow.org/)
+
+Code is easily portable to keras/[Theano](http://deeplearning.net/software/theano/install.html#install), 
+Tensorflow-specific code is only in the GPU usage configuration part

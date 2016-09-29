@@ -2,10 +2,13 @@
 import argparse as ap
 import json
 import numpy as np
-
+import os
 import data_helpers
 from model import build_compiled_model
 from w2v import train_word2vec
+
+import tensorflow as tf
+import keras.backend.tensorflow_backend as KTF
 
 parser = ap.ArgumentParser(description='CNN for sentence classtion')
 
@@ -56,6 +59,26 @@ parser.add_argument('--pref', type=str, default=None,
 
 args = parser.parse_args()
 
+# GPU restrictions
+
+
+def get_session(gpu_fraction=args.gpu_fraction):
+    """
+        Allocating only gpu_fraction of GPU memory for TensorFlow.
+    """
+
+    num_threads = os.environ.get('OMP_NUM_THREADS')
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction)
+
+    if num_threads:
+        return tf.Session(config=tf.ConfigProto(
+            gpu_options=gpu_options, intra_op_parallelism_threads=num_threads))
+    else:
+        return tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
+
+KTF.set_session(get_session())
+
 # ------- setting dataset -----------------------
 
 print('Loading dataset %s...' % args.dataset)
@@ -70,7 +93,6 @@ elif args.dataset == 'okuser':
     mode = 'binary'
 else:
     raise Exception("Unknown dataset: " + args.dataset)
-
 
 # ------- setting read args ---------------------
 
@@ -137,7 +159,6 @@ model.fit(xt, yt,
 
 # saving model
 if args.pref is not None:
-
     print('Saving model with prefix %s.%02d...' % (args.pref, num_epochs))
 
     model_name_path = '%s.%02d.json' % (args.pref, num_epochs)
